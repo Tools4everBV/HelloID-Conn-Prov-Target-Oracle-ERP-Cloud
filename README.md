@@ -4,7 +4,7 @@
 > This repository contains the connector and configuration code only. The implementer is responsible for acquiring the connection details, such as the username, password, and certificate. You might need to sign a contract or agreement with the supplier before implementing this connector. Please contact the client's application manager to coordinate the connector requirements.
 
 <p align="center">
-  <img src="">
+  <img src="https://github.com/Tools4everBV/HelloID-Conn-Prov-Target-Oracle-ERP-Cloud/blob/main/Logo.png?raw=true">
 </p>
 
 ## Table of contents
