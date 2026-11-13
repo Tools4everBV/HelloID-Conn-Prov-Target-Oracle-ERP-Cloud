@@ -2,7 +2,7 @@
 # HelloID-Conn-Prov-Target-Oracle-ERP-Cloud-RevokePermission-Datasecurity
 # PowerShell V2
 ################################################################
-$actionContext.DryRun = $false
+
 # Enable TLS1.2
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor [System.Net.SecurityProtocolType]::Tls12
 
