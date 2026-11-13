@@ -99,20 +99,37 @@ try {
         Write-Information "Verifying if a Oracle-ERP-Cloud account exists where $correlationField is: [$correlationValue]"
 
         $splatGetUserParams = @{
-            Uri     = "$($actionContext.Configuration.BaseUrl)/hcmRestApi/scim/Users?filter=$($correlationField) eq $($correlationValue)"
+            Uri     = "$($actionContext.Configuration.BaseUrl)/hcmRestApi/scim/Users?filter=$($correlationField) eq ""$($correlationValue)"""
             Method  = 'GET'
             Headers = $headers
         }
-
+        
         $correlatedAccount = (Invoke-RestMethod @splatGetUserParams).Resources
     }
 
     if ($correlatedAccount.Count -eq 0) {
         $lifecycleProcess = 'CreateAccount'
+        $personNumber = $actionContext.Data.externalId
+
+        if ($actionContext.DryRun -eq $true) {
+            Write-Warning "[DryRun] Will create user for $($personContext.Person.DisplayName)"
+        }
+
     }
     elseif ($correlatedAccount.Count -eq 1) {
         $correlatedAccount = $correlatedAccount | select-object -first 1
+        
+        $personNumber = $correlatedAccount."urn:scim:schemas:extension:fa:2.0:faUser".workerInformation.personNumber #RN?: personNumber gebruiken vanuit correlatie
+
+        if ([string]::isNullOrEmpty($personNumber)) {
+            $personNumber = $actionContext.Data.externalId
+        }
+
+        if ($actionContext.DryRun -eq $true) {
+            write-warning "[DryRun] Correlated account: $($correlatedAccount | convertto-json)"
+        }
         $lifecycleProcess = 'CorrelateAccount'
+        
     }
     elseif ($correlatedAccount.Count -gt 1) {
         throw "Multiple accounts found for person where $correlationField is: [$correlationValue]"
@@ -120,11 +137,15 @@ try {
 
     # Extra get request to retrieve the employee account of the correlated user account. This is needed to link the 2 accounts together.
     $splatGetEmployeerParams = @{
-        Uri     = "$($actionContext.Configuration.BaseUrl)/hcmRestApi/resources/11.13.18.05/workers?q=PersonNumber=$($actionContext.Data.externalId)&fields=PersonId&onlyData=true"
+        Uri     = "$($actionContext.Configuration.BaseUrl)/hcmRestApi/resources/11.13.18.05/workers?q=PersonNumber=$($personNumber)&fields=PersonId&onlyData=true"
         Method  = 'GET'
         Headers = $headers
     }
     $correlatedEmployeeAccount = (Invoke-RestMethod @splatGetEmployeerParams).items
+
+    if ($actionContext.DryRun -eq $true) {
+        write-warning "[DryRun] Correlated Person: $($correlatedEmployeeAccount | convertto-json)"
+    }
 
     if ($correlatedEmployeeAccount.Count -eq 0) {
         throw "No employee account found for person where PersonNumber is: [$($actionContext.Data.externalId)]"
@@ -157,14 +178,14 @@ try {
                 userName   = $actionContext.Data.userName
                 emails     = $emailList
                 externalId = $actionContext.Data.externalId
-            } | ConvertTo-Json
+            } 
 
 
             $splatCreateParams = @{
                 Uri     = "$($actionContext.Configuration.BaseUrl)/hcmRestApi/scim/Users"
                 Method  = 'POST'
                 Headers = $headers
-                Body    = $body
+                Body    = ($body | ConvertTo-Json -Depth 5)
             }
 
             # Make sure to test with special characters and if needed; add utf8 encoding.
@@ -182,10 +203,24 @@ try {
                             PersonId = $correlatedEmployeeAccount.PersonId
                         } | ConvertTo-Json)
                 }
+                
                 $null = Invoke-RestMethod @splatLinkUserParams
 
+                #Force update all fields after linking
+                $splatUpdateParams = @{
+                    Uri     = "$($actionContext.Configuration.BaseUrl)/hcmRestApi/scim/Users/$($createdAccount.Id)"
+                    Method  = 'PATCH'
+                    Headers = $headers
+                    Body    = ($body | ConvertTo-Json -Depth 5)
+                }
+
+                Write-Information "Updating Oracle-ERP-Cloud account with accountReference: [$($actionContext.References.Account)]"
+                $updatedAccount = Invoke-RestMethod @splatUpdateParams
+                $outputContext.Data = ConvertTo-HelloIDAccountObject -AccountObject $updatedAccount
+
+
                 # Make sure to filter out arrays from $outputContext.Data (If this is not mapped to type Array in the fieldmapping). This is not supported by HelloID.
-                $outputContext.Data = ConvertTo-HelloIDAccountObject -AccountObject $createdAccount
+                $outputContext.Data = ConvertTo-HelloIDAccountObject -AccountObject $updatedAccount
                 $outputContext.AccountReference = $createdAccount.Id
             }
             else {

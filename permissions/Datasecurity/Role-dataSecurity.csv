@@ -1,0 +1,6 @@
+﻿RoleName;RoleCommonName;SecurityContext;SecurityContextValue
+Financial Analyst;ORA_GL_FINANCIAL_ANALYST_JOB;Gegevenstoegangsset;GB Read Only
+Project Accountant;ORA_PJF_PROJECT_ACCOUNTANT_JOB;Business Unit;BU
+Warehouse Manager;ORA_INV_WAREHOUSE_MANAGER_JOB;Inventory organization;INVORG
+Warehouse Operator;ORA_INV_WAREHOUSE_OPERATOR_JOB;Voorraadorganisatie;HK
+Warehouse Operator;ORA_INV_WAREHOUSE_OPERATOR_JOB;Voorraadorganisatie;LOC

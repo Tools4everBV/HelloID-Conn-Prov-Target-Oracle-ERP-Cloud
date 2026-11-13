@@ -90,6 +90,11 @@ try {
 
     $pageStartIndex = 1
     $pageSize = 100
+
+    if ($actionContext.DryRun -eq $true) {
+        Write-Warning "[DryRun]: importing first $pageSize"
+    }
+  
     do {
         $splatImportAccountParams = @{
             Uri     = "$($actionContext.Configuration.BaseUrl)/hcmRestApi/scim/Users?startIndex=$pageStartIndex&count=$pageSize"

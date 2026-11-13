@@ -1,5 +1,5 @@
 ####################################################################
-# HelloID-Conn-Prov-Target-Oracle-ERP-Cloud-ImportPermissions-Group
+# HelloID-Conn-Prov-Target-Oracle-ERP-Cloud-ImportPermissions-Roles
 # PowerShell V2
 ####################################################################
 

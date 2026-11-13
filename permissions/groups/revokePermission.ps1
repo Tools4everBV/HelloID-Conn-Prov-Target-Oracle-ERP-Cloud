@@ -1,5 +1,5 @@
 #################################################################
-# HelloID-Conn-Prov-Target-Oracle-ERP-Cloud-RevokePermission-Group
+# HelloID-Conn-Prov-Target-Oracle-ERP-Cloud-RevokePermission-Roles
 # PowerShell V2
 #################################################################
 

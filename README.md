@@ -110,6 +110,8 @@ The account reference is populated with the property `id` property from _Oracle-
 
 - **Person Number Matching**: During account creation, the connector matches the HelloID person’s `ExternalId` with the Oracle employee `PersonNumber`. The connector makes an additional API request to a different non-SCIM endpoint to resolve the employee before creating the user. Exactly one matching employee with a valid `PersonId` is required.
 
+- **Person Update after link**: After linking an user to an employee an update is forced because certain values will be overwritten while linking.
+
 - **API Version Segment**: The `11.13.18.05` part in the REST endpoints appears to be a version or release identifier for the Oracle ERP Cloud API. In practice, The latest alias is also supported and can be used as a shorthand when specifying an exact API version is unnecessary. However, API updates or changes introduced by the supplier may affect connector compatibility and behavior, potentially requiring adjustments to the connector.
 
 
