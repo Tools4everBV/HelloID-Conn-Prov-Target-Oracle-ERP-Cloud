@@ -25,6 +25,7 @@
     - [SCIM User Response Conversion](#scim-user-response-conversion)
     - [User Update Payload](#user-update-payload)
     - [Employee Linkage and Management](#employee-linkage-and-management)
+    - [Permissions](#permissions)
   - [Development resources](#development-resources)
     - [API endpoints](#api-endpoints)
     - [API documentation](#api-documentation)
@@ -42,7 +43,7 @@ The following features are available:
 | Feature                                   | Supported | Actions                                 | Remarks |
 | ----------------------------------------- | --------- | --------------------------------------- | ------- |
 | **Account Lifecycle**                     | ✅         | Create, Update, Enable, Disable, Delete |         |
-| **Permissions**                           | ✅         | Retrieve, Grant, Revoke                 |         |
+| **Permissions**                           | ✅         | Retrieve, Grant, Revoke                 | roles,datasecurities         |
 | **Resources**                             | ❌         | -                                       |         |
 | **Entitlement Import: Accounts**          | ✅         | -                                       |         |
 | **Entitlement Import: Permissions**       | ✅         | -                                       |         |
@@ -114,6 +115,14 @@ The account reference is populated with the property `id` property from _Oracle-
 
 - **API Version Segment**: The `11.13.18.05` part in the REST endpoints appears to be a version or release identifier for the Oracle ERP Cloud API. In practice, The latest alias is also supported and can be used as a shorthand when specifying an exact API version is unnecessary. However, API updates or changes introduced by the supplier may affect connector compatibility and behavior, potentially requiring adjustments to the connector.
 
+### Permissions
+- **Data Security Requires a Role**: Data security can only be assigned after the corresponding role has been granted to the user.
+
+- **Role Revocation with Active Data Security**: A role can still be revoked while an active data security assignment is linked to it.
+
+- **Data Security Composition**: A data security assignment consists of the technical name of the role, the securitycontext, the securitycontextvalue, and the username of the user.
+
+- **Data Security Revocation**: When data security is revoked, the assignment is not deleted. Instead, the `ActiveFlag` must be set to `false`.
 
 ## Development resources
 
@@ -131,10 +140,18 @@ The following endpoints are used by the connector:
 | `/hcmRestApi/scim/Roles/{permissionReference}`                                                        | PATCH              | Grant or revoke a permission for a user.                     |
 | `/hcmRestApi/resources/11.13.18.05/workers?q=PersonNumber={externalId}&fields=PersonId&onlyData=true` | GET                | Extra non-SCIM request to find the Oracle employee associated with a HelloID person. |
 | `/hcmRestApi/resources/11.13.18.05/userAccounts/{userId}`                                             | PATCH              | Extra non-SCIM request to link the user account to the Oracle employee.                |
+| `/fscmRestApi/resources/11.13.18.05/dataSecurities?q=`                                                | GET                | Get all datasecurities or a selection based on the parameters defined in the query (q=) |
+| `/fscmRestApi/resources/11.13.18.05/dataSecurities/ `                                                 | POST               | Add assignment for datasecurity                |
+| `/fscmRestApi/resources/11.13.18.05/dataSecurities/{UserRoleDataAssignmentId}`                        | PATCH              | Update the assigned datasecurity (active: true/false)                 |
+
 
 ### API documentation
 
-For more information on the Oracle ERP Cloud API, please refer to the [Oracle ERP Cloud API documentation](https://docs.oracle.com/en/cloud/saas/applications-common/26a/farca/api-users.html).
+For more information on the Oracle ERP Cloud API, please refer to the API:
+- [REST API for Common Features in Oracle Fusion Cloud Applications (SCIM)](https://docs.oracle.com/en/cloud/saas/applications-common/26a/farca/api-users.html).
+- [REST API for Oracle Fusion Cloud HCM (userAccounts/workers)](https://docs.oracle.com/en/cloud/saas/human-resources/farws/api-user-accounts.html)
+- [REST API for Oracle Fusion Cloud Financials (datasecurity)](https://docs.oracle.com/en/cloud/saas/financials/26a/farfa/api-data-security-users.html).
+
 
 ## Getting help
 
