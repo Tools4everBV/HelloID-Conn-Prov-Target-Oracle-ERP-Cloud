@@ -61,7 +61,7 @@ try {
     }
 
     Write-Information "Getting all users"
-    
+
     $pageStartIndex = 1
     $pageSize = 100
     $users = @()
@@ -77,7 +77,7 @@ try {
 
         $responseStartIndex = if ($response.startIndex) { [int]$response.startIndex } else { $pageStartIndex }
         $pageStartIndex = $responseStartIndex + $response.Resources.Count
-            
+
     } while ($response.Resources.Count -ge $pageSize)   
 
     Write-Information "found $(($users | measure-object).count) users"
@@ -98,28 +98,19 @@ try {
         $importedPermissions = @($response.items)
 
         foreach ($importedPermission in $importedPermissions) {
-
-            $displayname = "$($importedPermission.Rolerf) - $($importedPermission.SecurityContext) - $($importedPermission.SecurityContextValue)"
-
-            if ($displayname.length -gt 100) {
-                $displayname = "$($importedPermission.Rolerf.Substring(0, [Math]::Min(30, $importedPermission.Rolerf.Length))).. - $($importedPermission.SecurityContext.Substring(0, [Math]::Min(30, $securityContext.SecurityContext.Length))).. - $($importedPermission.SecurityContextValue.Substring(0, [Math]::Min(30, $importedPermission.SecurityContextValue.Length))).."
-            }
-
             $permission = @{
                 PermissionReference = @{
                     RoleCommonName       = $importedPermission.RoleCommonName
                     SecurityContext      = $importedPermission.SecurityContext
                     SecurityContextValue = $importedPermission.SecurityContextValue
                 }
-                Description         = $displayname 
-                DisplayName         = $displayname 
                 AccountReferences   = $null
             }
-     
+
             $permission.AccountReferences = @($usersGrouped[$importedpermission.username].ID)
             Write-Output $permission
         }
-    
+
         $offset += $response.limit
 
     } while ($importedPermissions.Count -ge $pageSize -and ($false -eq $actionContext.DryRun))

@@ -116,6 +116,8 @@ The account reference is populated with the property `id` property from _Oracle-
 - **API Version Segment**: The `11.13.18.05` part in the REST endpoints appears to be a version or release identifier for the Oracle ERP Cloud API. In practice, The latest alias is also supported and can be used as a shorthand when specifying an exact API version is unnecessary. However, API updates or changes introduced by the supplier may affect connector compatibility and behavior, potentially requiring adjustments to the connector.
 
 ### Permissions
+- **Mapping file**: When Data Securities are in scope a mapping file is mandatory, for an example: `Role-dataSecurity.csv`. Also the connector need to be an on-premise executed connector.
+
 - **Data Security Requires a Role**: Data security can only be assigned after the corresponding role has been granted to the user.
 
 - **Role Revocation with Active Data Security**: A role can still be revoked while an active data security assignment is linked to it.

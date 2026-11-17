@@ -129,37 +129,38 @@ try {
             }       
             else {
                 #REVOKE
-                if($correlatedDataSecurity.ActiveFlag -eq $true){
-                $SetActivebody = @{
-                    ActiveFlag = $false
-                }
-
-                $splatRevokePermissionParams = @{
-                    Uri     = "$($actionContext.Configuration.BaseUrl)/fscmRestApi/resources/11.13.18.05/dataSecurities/$($correlatedDataSecurity.UserRoleDataAssignmentId)"
-                    Method  = 'PATCH'
-                    Headers = $headers
-                    Body    = $SetActivebody | convertto-json
-                }
-
-                if (-not($actionContext.DryRun -eq $true)) {
-                    Write-Information "Revoking Oracle-ERP-Cloud dataSecurity: [$($actionContext.PermissionDisplayName)] with id [$($correlatedDataSecurity.UserRoleDataAssignmentId)]"
-                    try {
-                        $null = Invoke-RestMethod @splatRevokePermissionParams
-                        $auditLogMessage = "Revoke permission [$($actionContext.PermissionDisplayName)] with id [$($correlatedDataSecurity.UserRoleDataAssignmentId)] was successful - updating ActiveFlag"
+                if ($correlatedDataSecurity.ActiveFlag -eq $true) {
+                    $SetActivebody = @{
+                        ActiveFlag = $false
                     }
-                    catch {
-                        Throw $_
+
+                    $splatRevokePermissionParams = @{
+                        Uri     = "$($actionContext.Configuration.BaseUrl)/fscmRestApi/resources/11.13.18.05/dataSecurities/$($correlatedDataSecurity.UserRoleDataAssignmentId)"
+                        Method  = 'PATCH'
+                        Headers = $headers
+                        Body    = $SetActivebody | convertto-json
                     }
-                }
+
+                    if (-not($actionContext.DryRun -eq $true)) {
+                        Write-Information "Revoking Oracle-ERP-Cloud dataSecurity: [$($actionContext.PermissionDisplayName)] with id [$($correlatedDataSecurity.UserRoleDataAssignmentId)]"
+                        try {
+                            $null = Invoke-RestMethod @splatRevokePermissionParams
+                            $auditLogMessage = "Revoke permission [$($actionContext.PermissionDisplayName)] with id [$($correlatedDataSecurity.UserRoleDataAssignmentId)] was successful - updating ActiveFlag"
+                        }
+                        catch {
+                            Throw $_
+                        }
+                    }
             
-                else {
-                    Write-Information "[DryRun] revoke Oracle-ERP-Cloud dataSecurity: [$($actionContext.PermissionDisplayName)] with id [$($correlatedDataSecurity.UserRoleDataAssignmentId)], will be executed during enforcement"
-                    Write-Warning "[DryRun] with body: $($splatRevokePermissionParams.body)"
-                    $auditLogMessage = "[DryRun]  revoke dataSecurity [$($actionContext.PermissionDisplayName)] with id [$($correlatedDataSecurity.UserRoleDataAssignmentId)] was successful"
+                    else {
+                        Write-Information "[DryRun] revoke Oracle-ERP-Cloud dataSecurity: [$($actionContext.PermissionDisplayName)] with id [$($correlatedDataSecurity.UserRoleDataAssignmentId)], will be executed during enforcement"
+                        Write-Warning "[DryRun] with body: $($splatRevokePermissionParams.body)"
+                        $auditLogMessage = "[DryRun]  revoke dataSecurity [$($actionContext.PermissionDisplayName)] with id [$($correlatedDataSecurity.UserRoleDataAssignmentId)] was successful"
+                    }
                 }
-                           } else{
-                            Write-Information "Skip Revoking - ActiveFlag = $($correlatedDataSecurity.ActiveFlag)"
-                           }   
+                else {
+                    Write-Information "Skip Revoking - ActiveFlag = $($correlatedDataSecurity.ActiveFlag)"
+                }   
             }
 
             $outputContext.Success = $true

@@ -67,7 +67,7 @@ function Confirm-MappingCsv {
         throw "[$Type] does not contain any rows"
     }
     $csvHeaders = @{
-        'RoleDatasecurity' = @('RoleCommonName', 'SecurityContext','SecurityContextValue')
+        'RoleDatasecurity' = @('RoleCommonName', 'SecurityContext', 'SecurityContextValue')
     }
 
     if ($null -eq $csvHeaders[$Type]) {
@@ -82,31 +82,32 @@ function Confirm-MappingCsv {
 
 #endregion
 
-Try{
+Try {
     $securityContexts = import-csv -Path $actionContext.Configuration.DataSecurityMapping -Delimiter ";"
     $null = Confirm-MappingCsv -CsvTable $securityContexts -Type 'RoleDataSecurity'
-}catch {
+}
+catch {
     Throw "Failed to read mapping file - $($_)"
 }
 
 try {    
-          foreach ($securityContext in $securityContexts){
-            $displayname = "$($securityContext.RoleName) - $($securityContext.SecurityContext) - $($securityContext.SecurityContextValue)"
+    foreach ($securityContext in $securityContexts) {
+        $displayname = "$($securityContext.RoleName) - $($securityContext.SecurityContext) - $($securityContext.SecurityContextValue)"
 
-            if($displayname.length -gt 100){
-                $displayname = "$($securityContext.RoleName.Substring(0, [Math]::Min(30, $securityContext.RoleName.Length))).. - $($securityContext.SecurityContext.Substring(0, [Math]::Min(30, $securityContext.SecurityContext.Length))).. - $($securityContext.SecurityContextValue.Substring(0, [Math]::Min(30, $securityContext.SecurityContextValue.Length))).."
+        if ($displayname.length -gt 100) {
+            $displayname = "$($securityContext.RoleName.Substring(0, [Math]::Min(30, $securityContext.RoleName.Length))).. - $($securityContext.SecurityContext.Substring(0, [Math]::Min(30, $securityContext.SecurityContext.Length))).. - $($securityContext.SecurityContextValue.Substring(0, [Math]::Min(30, $securityContext.SecurityContextValue.Length))).."
+        }
+        $outputContext.Permissions.Add(
+            @{
+                DisplayName    = $displayname
+                Identification = @{                          
+                    RoleCommonName       = $securityContext.RoleCode
+                    SecurityContext      = $securityContext.SecurityContext
+                    SecurityContextValue = $securityContext.SecurityContextValue
+                }
             }
-              $outputContext.Permissions.Add(
-                  @{
-                      DisplayName    = $displayname
-                      Identification = @{                          
-                          RoleCommonName = $securityContext.RoleCode
-                          SecurityContext = $securityContext.SecurityContext
-                          SecurityContextValue = $securityContext.SecurityContextValue
-                      }
-                  }
-              )
-          }
+        )
+    }
         
 
     Write-Information "Retrieved $($outputContext.Permissions.Count) permissions"
